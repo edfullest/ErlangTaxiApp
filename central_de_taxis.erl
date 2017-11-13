@@ -1,11 +1,9 @@
 -module(central_de_taxis). 
--export([nodoServidorTaxis/0]).
+-export([matriz/0]).
+-import('matriz', [genera_nodo/1]).
 
-% Este es el nodo a donde se conectará la central 
-nodoServidorTaxis() -> case inet:gethostname() of
-                        {ok, Hostname} ->
-                        "central_de_taxis@" ++ Hostname ++ ".local"                        
-                       end.
+matriz() -> genera_nodo("central_de_taxis").
+
 
 % 'servidorTaxi@' ++ inet:gethostname() ++ '.local'. % funciones de interfase 
 

@@ -16,7 +16,7 @@ crear_central(Nombre, {X,Y}) ->
     NodoTaxi = nodo_taxi(),
     % Se manda a servidor taxis la nueva central que se esta creando, para que el servidor
     % taxi tenga registro de ésta
-    {servidor_taxis, NodoServidor} ! {respuesta_central, Nombre, {X,Y}, PID_Central},
+    {servidor_taxi, NodoServidor} ! {respuesta_central, Nombre, {X,Y}, PID_Central},
     % Además, se manda esta central al nodo taxi para que tenga registro de la central que se acaba de crear
     % Esto ayuda en Taxi, pues asi cualquier Taxi puede crear un nuevo taxi en esa central
     {taxi, NodoTaxi} ! {respuesta_central, Nombre, {X,Y}, PID_Central},

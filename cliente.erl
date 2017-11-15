@@ -1,5 +1,5 @@
 -module(cliente). 
--export([pedir_taxi/0]).
+-export([pedir_taxi/2]).
 -import('matriz', [genera_nodo/1]).
 
 % La funcion genera_nodo genera la matriz a donde se conectara, con todo y su hostname

@@ -16,24 +16,24 @@ pide_taxi(Quien, {X, Y}) ->
     {servidor_taxi, Matriz} ! {pedir_cliente, Quien, {X, Y}, self()}, 
     receive
         {NumServicio, T_PID, Tipo, Placas}} ->
-        	io:format("Se le asigno un auto tipo ~p con placas ~p.", [Tipo, Placas]).
-        	io:format("Su numero de servicio es: ~p | El T_PID de su taxi es: ~p.", [NumServicio, T_PID]).
+        	io:format("Se le asigno un auto tipo ~p con placas ~p.", [Tipo, Placas]),
+        	io:format("Su numero de servicio es: ~p | El T_PID de su taxi es: ~p.", [NumServicio, T_PID]),
             monitor_node(Matriz, false),
             receive
             	{taxi, llega} ->
-            		ok
+            		ok.
             after wait() -> 
-            	cancelar(T_PID)
+            	cancelar(T_PID, self()).
             end;
         no_taxis_disponibles ->
             noTaxi;
         {nodedown, Matriz} ->
-        	noServer
+        	noServer;
 end.
 
-cancelar(T_PID) ->
+cancelar(T_PID, C_PID) ->
 	Matriz = nodo_taxi(),
-	{taxi, Matriz} ! {self(), cancelar}.
+	{taxi, Matriz} ! {C_PID, cancelar}.
 
 
 wait() -> random:uniform(10000).

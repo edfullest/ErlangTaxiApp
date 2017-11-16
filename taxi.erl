@@ -8,7 +8,7 @@ nodo_servidor() -> genera_nodo("central_taxis").
 nodo_cliente() -> genera_nodo("cliente").
 
 crear_taxi(Tipo, Placas, NombreCentral)->
-    lista_centrales ! {crear_taxi, {Tipo,Placas,NombreCentral}}
+    lista_centrales ! {crear_taxi, {Tipo,Placas,NombreCentral}};
 
 % taxi
 servicio_taxi(Tipo,Placas,PID_Central) ->

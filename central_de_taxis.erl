@@ -67,8 +67,6 @@ central_taxis_test() ->
     PID_Central ! {nuevo_taxi, {self(), 'sedan', 'SRJ 10 04'}},
     PID_Central ! listar_taxis,
     PID_Central ! solicitar_taxi.
-
-inicio() ->
     
 
 	

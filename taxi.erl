@@ -17,7 +17,6 @@ servicio_taxi(Tipo,Placas,PID_Central) ->
 						PID_Central ! {respuesta_taxi, servicio_cancelado},
 						PID_Central ! {nuevo_taxi, {self(), Tipo, Placas}},
 						servicio_taxi(Tipo,Placas,PID_Central)
-                    io:fwrite("El taxi con placas ~s fue cancelado por cliente con PID ~p ~n", [Placas,PID_Cliente]),
 				after Espera ->
 					io:fwrite("El taxi con placas ~s hace servicio ~n", [Placas]),			
 					PID_Cliente ! {taxi,llega},

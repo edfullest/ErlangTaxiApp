@@ -42,7 +42,10 @@ lista_centrales(ListaCentrales) ->
 					lista_centrales(ListaCentrales)
 			end;
 		{respuesta_central, Nombre, {X,Y}, PID_Central} ->
-				lista_centrales(ListaCentrales ++ {Nombre, {X,Y}, PID_Central})
+                io:fwrite("Se recibio solicitud para crear central ~s ~n", [Nombre]),
+				lista_centrales(ListaCentrales ++ [{Nombre, {X,Y}, PID_Central}]);
+        lista_centrales -> io:fwrite("Las centrales son ~p ~n", [ListaCentrales]),
+                           lista_centrales(ListaCentrales)
     end.
 
 wait() -> rand:uniform(5000).

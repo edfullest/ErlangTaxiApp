@@ -19,13 +19,13 @@ servicio_taxi(Tipo,Placas,PID_Central}) ->
 				io:fwrite("El taxi con placas ~s esta esperando por ~p ~n", [Placas,Espera]),
 				receive 
 					{De , cancelar} ->
-					{servicio_central, PID_Central} ! {respuesta_taxi, servicio_cancelado},
+					{PID_Central, nodo_servidor()} ! {respuesta_taxi, servicio_cancelado},
 					PID_Central ! {nuevo_taxi,self(), Tipo, Placas},
 					servicio_taxi(Tipo,Placas,PID_Central)
 				after Espera ->
 					io:fwrite("El taxi con placas ~s hace servicio ~n", [Placas]),			
-					{pide_taxi,PID_Cliente} ! {taxi,llega},
-					{servicio_central, PID_Central} ! {respuesta_taxi, servicio_ofrecido}.
+					{pide_taxi,nodo_servidor()} ! {taxi,llega},
+					{PID_Central, servicio_central}! {respuesta_taxi, servicio_ofrecido}.
 			
 		end.
 		

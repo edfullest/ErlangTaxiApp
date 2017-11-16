@@ -41,7 +41,25 @@ lista_centrales(ListaCentrales) ->
 					lista_centrales(ListaCentrales)
 			end;
 		{respuesta_central, NombreCentral, {X,Y}, PID_Central} ->
-			lista_centrales(ListaCentrales ++ [{NombreCentral, {X,Y}, PID_Central}])
+			lista_centrales(ListaCentrales ++ [{NombreCentral, {X,Y}, PID_Central}]);
+        {lista_servicios, NombreCentral} ->
+            case buscar(NombreCentral, ListaCentrales) of
+                indefinido ->
+                    io:fwrite("La central no existe ~n"),
+                    lista_centrales(ListaCentrales);
+                PID_Central ->
+                    PID_Central ! listar_servicios,
+                    lista_centrales(ListaCentrales)
+            end;
+        {listar_taxis, NombreCentral} ->
+            case buscar(NombreCentral, ListaCentrales) of
+                indefinido ->
+                    io:fwrite("La central no existe ~n"),
+                    lista_centrales(ListaCentrales);
+                PID_Central ->
+                    PID_Central ! listar_taxis,
+                    lista_centrales(ListaCentrales)
+            end
     end.
 
 wait() -> rand:uniform(5000).

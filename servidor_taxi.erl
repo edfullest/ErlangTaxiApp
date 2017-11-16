@@ -5,33 +5,33 @@ servidor(Centrales, RegistroClientes, NumServicio) ->
 	process_flag(trap_exit, true),
 	receive
 		{respuesta_central, Nombre_Central, {X, Y}, PID_Central} ->
-			io:format("Se recibió una solicitud de una central con PID ~p que quiere registrarse.~n", [PID_Central]),
+			io:format("~ts Se recibió una solicitud de una central con PID ~p que quiere registrarse.~n", ["☐",PID_Central]),
 			case centralYaExiste(Centrales, Nombre_Central) of
 				no_existe ->
 					link(PID_Central),
-					io:format("La central con PID ~p ha sido registrada exitosamente con el nombre ~p.~n", [PID_Central, Nombre_Central]),
+					io:format("~ts La central con PID ~p ha sido registrada exitosamente con el nombre ~p.~n", ["✔︎",PID_Central, Nombre_Central]),
 					servidor(lists:append(Centrales, [{Nombre_Central, {X, Y}, PID_Central}]), RegistroClientes, NumServicio);
 				si_existe ->
 					PID_Central ! repetido,
-					io:format("No se pudo registrar a la central con PID ~p, pues ya existía una central con el nombre ~p.~n", [PID_Central, Nombre_Central]),
+					io:format("~ts No se pudo registrar a la central con PID ~p, pues ya existía una central con el nombre ~p.~n", ["✖︎",PID_Central, Nombre_Central]),
 					servidor(Centrales, RegistroClientes, NumServicio)
 			end;
 		{pedir_cliente, Nombre_Cliente, {X, Y}, PID_Cliente} ->
-			io:format("Se recibió una solicitud de taxi de ~p con localización ~p.~n", [Nombre_Cliente, {X, Y}]),
+			io:format("~ts Se recibió una solicitud de taxi de ~p con localización ~p.~n", ["☐",Nombre_Cliente, {X, Y}]),
 			CentralesOrdenadas = lists:sort(fun({_, Dist1, _}, {_, Dist2, _}) -> Dist1 =< Dist2 end, listaDeCentralesConDistancia(Centrales, {X, Y})),
 			case solicitarTaxi(CentralesOrdenadas) of
 				{Nombre_Central, PID_Taxi, Tipo, Placas} ->
 					PID_Cliente ! {NumServicio, PID_Taxi, Tipo, Placas},
 					PID_Taxi ! {PID_Cliente, {X, Y}},
-					io:format("Se le asignó un taxi de tipo ~p con placas ~p de la central ~p al cliente ~p.~n", [Tipo, Placas, Nombre_Central, Nombre_Cliente]),
+					io:format("~ts Se le asignó un taxi de tipo ~p con placas ~p de la central ~p al cliente ~p.~n", ["◼︎",Tipo, Placas, Nombre_Central, Nombre_Cliente]),
 					servidor(Centrales, agregarRegistro(RegistroClientes, {Nombre_Cliente, Nombre_Central, Tipo, Placas}), NumServicio + 1);
 				no_taxis_disponibles ->
 					PID_Cliente ! no_taxis_disponibles,
-					io:format("No hay taxis disponibles para asignarle al cliente ~p.~n", [Nombre_Cliente]),
+					io:format("~ts No hay taxis disponibles para asignarle al cliente ~p.~n", ["✖︎",Nombre_Cliente]),
 					servidor(Centrales, agregarRegistro(RegistroClientes, {Nombre_Cliente, no_taxis_disponibles}), NumServicio)
 			end;
 		{'EXIT', PID_Central, _} ->
-			io:format("La central con PID ~p ya no está funcionando.~n", [PID_Central]),
+			io:format("~ts La central con PID ~p ya no está funcionando.~n", ["▷",PID_Central]),
 			servidor(eliminarCentral(Centrales, PID_Central), RegistroClientes, NumServicio);
 		paro ->
 			paro;

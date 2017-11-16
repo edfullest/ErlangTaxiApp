@@ -14,7 +14,7 @@ crear_central(Nombre, {X,Y}) ->
     PID_Central = spawn(fun () -> servicio_central(Nombre, [], 0, 0) end),
     NodoServidor = nodo_servidor(),
     NodoTaxi = nodo_taxi(),
-    % Se manda a servidor taxis la nueva central que se esta creando, para que el servidor
+    % Se manda al servidor_taxi la nueva central que se esta creando, para que el servidor
     % taxi tenga registro de ésta
     {servidor_taxi, NodoServidor} ! {respuesta_central, Nombre, {X,Y}, PID_Central},
     % Además, se manda esta central al nodo taxi para que tenga registro de la central que se acaba de crear
@@ -28,11 +28,11 @@ servicio_central(Nombre, ListaTaxis, NumServicios, NumCancelaciones) ->
     receive
         %%% MENSAJES RECIBIDOS DE SERVIDOR TAXI %%%
 
-        % Este mensaje sera recibido por el servidor de taxis cuando éste ocupe de un taxi
-        % Si tiene, consigue el primero y se lo manda al servidor, y si no, le dice que no tiene
+        % Este mensaje sera recibido del servidor de taxis cuando éste ocupe un taxi.
+        % Si tiene, consigue el primero y se lo manda al servidor, y si no, le dice que no tiene.
         solicitar_taxi -> case length(ListaTaxis) > 0 of
                                 true -> {PID_Taxi, Tipo, Placas} = hd(ListaTaxis),
-                                        io:fwrite("~ts EXITO: Servidor Taxi pidió un taxi a la central ~s. La central despachó el taxi con placas ~s .~n", ["✔",Nombre, Placas]),
+                                        io:fwrite("~ts EXITO: Servidor Taxi pidió un taxi a la central ~s. La central despachó el taxi con placas ~s .~n", ["✔", Nombre, Placas]),
                                         {servidor_taxi, NodoServidor} ! {si, {PID_Taxi, Tipo, Placas}},
                                         servicio_central(Nombre, tl(ListaTaxis), NumServicios, NumCancelaciones);
                                 false -> {servidor_taxi, NodoServidor} ! no,
@@ -47,17 +47,18 @@ servicio_central(Nombre, ListaTaxis, NumServicios, NumCancelaciones) ->
                             servicio_central(Nombre, ListaTaxis, NumServicios, NumCancelaciones);
         % Si el servidor taxi determina que la central que se quiso crear tiene un nombre repetido, entonces
         % se manda el mensaje de error correspondiente
-        repetido -> io:fwrite("~ts ERROR: Central ~s con proceso ~p no fue creado, pues ya existe una central de taxis registrada con ese nombre. ~n", ["✖︎✖︎✖︎",Nombre, self()]),
-                        servicio_central(Nombre, ListaTaxis, NumServicios, NumCancelaciones);
+        repetido -> io:fwrite("~ts ERROR: Central ~s con proceso ~p no fue creado, pues ya existe una central de taxis registrada con ese nombre. ~n", ["✖︎✖︎✖︎",Nombre, self()]);
         parar -> io:fwrite("Central ~s con PID ~p va a terminar! ~n", [Nombre, self()]);
 
         %%% MENSAJES RECIBIDOS DE ALGUN TAXI %%%
 
-        % El nuevo proceso de taxi creado se registra a esta central de taxi en específico. Le manda el taxi y se le appendea a la lista actual
-        {nuevo_taxi, Taxi} -> servicio_central(Nombre, ListaTaxis ++ [Taxi], NumServicios, NumCancelaciones);
+        % El nuevo proceso de taxi creado se registra a esta central de taxi en específico. Le manda el taxi y se le agrega a la lista actual
+        {nuevo_taxi, {PID_Taxi, Tipo, Placas}} -> 
+                io:fwrite("~ts Taxi de placas ~s con PID ~p llegó a la central ~s ~n", ["🚕",Placas, PID_Taxi, Nombre]),
+                servicio_central(Nombre, ListaTaxis ++ [{PID_Taxi, Tipo, Placas}], NumServicios, NumCancelaciones);
         % Si el taxi pudo ofrecer el servicio, entonces se aumenta en uno el numero de servicios
         {respuesta_taxi, servicio_ofrecido} -> servicio_central(Nombre, ListaTaxis, NumServicios + 1, NumCancelaciones);
-        % Si el taxi NO pudo ofrecer el servicio, entonces se aumenta en uno el numero de servicios
+        % Si el taxi NO pudo ofrecer el servicio, entonces se aumenta en uno el numero de cancelaciones
         {respuesta_taxi, servicio_cancelado} -> servicio_central(Nombre, ListaTaxis, NumServicios, NumCancelaciones + 1);
         {nodedown, NodoServidor} -> io:fwrite("~ts El servidor de taxis murió. La central también lo hará ~n", ["☹︎"])
     end.
@@ -67,6 +68,3 @@ central_taxis_test() ->
     PID_Central ! {nuevo_taxi, {self(), 'sedan', 'SRJ 10 04'}},
     PID_Central ! listar_taxis,
     PID_Central ! solicitar_taxi.
-    
-
-	

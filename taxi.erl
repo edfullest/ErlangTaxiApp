@@ -1,9 +1,10 @@
 -module(taxi). 
--export([crear_taxi/3, inicio_lista_centrales/0]).
+-export([crear_taxi/3, inicio/0]).
 -import('matriz', [genera_nodo/1]).
 
 crear_taxi(Tipo, Placas, NombreCentral)->
     lista_centrales ! {crear_taxi, {Tipo,Placas,NombreCentral}}.
+
 
 % taxi
 servicio_taxi(Tipo,Placas,PID_Central) ->
@@ -12,7 +13,7 @@ servicio_taxi(Tipo,Placas,PID_Central) ->
 		receive
 			{PID_Cliente, {_,_}} ->
 				Espera = wait(),
-				io:fwrite("~ts El taxi con placas ~s se tardará ~p en llegar al cliente con PID ~p ~n", ["◻︎",Placas,Espera, PID_Cliente]),
+				io:fwrite("~ts El taxi con placas ~s se tardará ~p ms en llegar al cliente con PID ~p ~n", ["◻︎",Placas,Espera, PID_Cliente]),
 				receive
 					{PID_Cliente, cancelar} ->
 						io:fwrite("~ts El taxi con placas ~s fue cancelado por cliente con PID ~p ~n", ["✖︎",Placas,PID_Cliente]),
@@ -42,7 +43,7 @@ lista_centrales(ListaCentrales) ->
 			end;
 		{respuesta_central, NombreCentral, {X,Y}, PID_Central} ->
 			lista_centrales(ListaCentrales ++ [{NombreCentral, {X,Y}, PID_Central}]);
-        {lista_servicios, NombreCentral} ->
+        {listar_servicios, NombreCentral} ->
             case buscar(NombreCentral, ListaCentrales) of
                 indefinido ->
                     io:fwrite("La central no existe ~n"),
@@ -71,5 +72,5 @@ buscar(Quien, [_|T]) ->
 buscar(_, _) ->
     indefinido.
 
-inicio_lista_centrales() ->
+inicio() ->
     register(lista_centrales, spawn(fun() -> lista_centrales([]) end)).

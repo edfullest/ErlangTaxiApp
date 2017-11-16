@@ -9,7 +9,8 @@ servidor(Centrales, RegistroClientes, NumServicio) ->
 			case centralYaExiste(Centrales, Nombre_Central) of
 				no_existe ->
 					link(PID_Central),
-					io:format("~ts La central con PID ~p ha sido registrada exitosamente con el nombre ~p.~n", ["✔︎",PID_Central, Nombre_Central]),
+					PID_Central ! {respuesta_servidor, si},
+					io:format("~ts La central con PID ~p ha sido registrada exitosamente con el nombre ~p.~n", ["◼︎",PID_Central, Nombre_Central]),
 					servidor(lists:append(Centrales, [{Nombre_Central, {X, Y}, PID_Central}]), RegistroClientes, NumServicio);
 				si_existe ->
 					PID_Central ! repetido,

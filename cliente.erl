@@ -21,14 +21,14 @@ pide_taxi(Quien, {X, Y}) ->
             monitor_node(Matriz, false),
             receive
             	{taxi, llega} ->
-            		ok
+            		ok.
             after wait() -> 
-            	cancelar(T_PID)
+            	cancelar(T_PID, self()).
             end;
         no_taxis_disponibles ->
             noTaxi;
         {nodedown, Matriz} ->
-        	noServer
+        	noServer;
 end.
 
 cancelar(T_PID) -> T_PID ! {self(), cancelar}.

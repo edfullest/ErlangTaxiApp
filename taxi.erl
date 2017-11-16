@@ -2,13 +2,16 @@
 -export([crear_taxi/3, inicio_lista_centrales/0]).
 -import('matriz', [genera_nodo/1]).
 
+crear_taxi(Tipo, Placas, NombreCentral)->
+    lista_centrales ! {crear_taxi, {Tipo,Placas,NombreCentral}}
+
 % taxi
 servicio_taxi(Tipo,Placas,PID_Central) ->
 		receive
 			{PID_Cliente, {_,_}} ->
 				Espera = wait(),
 				io:fwrite("El taxi con placas ~s esta esperando por ~p ~n", [Placas,Espera]),
-				receive 
+				receive
 					{PID_Cliente, cancelar} ->
 						PID_Central ! {respuesta_taxi, servicio_cancelado},
 						PID_Central ! {nuevo_taxi, {self(), Tipo, Placas}},
@@ -19,7 +22,7 @@ servicio_taxi(Tipo,Placas,PID_Central) ->
 					PID_Central ! {respuesta_taxi, servicio_ofrecido}
 				end
 		end.
-		
+
 lista_centrales(ListaCentrales) ->
     receive
         {crear_taxi, {Tipo, Placas, NombreCentral}} ->
@@ -39,15 +42,11 @@ lista_centrales(ListaCentrales) ->
 wait() -> rand:uniform(5000).
 
 buscar(Nombre, [{Nombre, _, PID_Central}|_]) ->
-    PID_Central; 
+    PID_Central;
 buscar(Quien, [_|T]) ->
     buscar(Quien, T);
 buscar(_, _) ->
     indefinido.
-	
-crear_taxi(Tipo, Placas, NombreCentral)->
-    lista_centrales ! {crear_taxi, {Tipo,Placas,NombreCentral}}.
 
 inicio_lista_centrales() ->
     register(lista_centrales, spawn(fun() -> lista_centrales([]) end)).
-
